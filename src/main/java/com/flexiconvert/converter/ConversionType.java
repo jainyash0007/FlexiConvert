@@ -1,4 +1,4 @@
-package com.yash.converter;
+package com.flexiconvert.converter;
 
 public enum ConversionType {
     TXT_TO_PDF,

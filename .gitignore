@@ -1,0 +1,15 @@
+# Maven
+target/
+*.log
+*.class
+*.jar
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sample Files
+sampleDocs/

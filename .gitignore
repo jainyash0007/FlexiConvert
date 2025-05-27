@@ -13,3 +13,6 @@ Thumbs.db
 
 # Sample Files
 sampleDocs/
+
+# Application Logs
+logs/

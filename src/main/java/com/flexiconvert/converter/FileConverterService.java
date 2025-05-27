@@ -1,113 +1,109 @@
 package com.flexiconvert.converter;
 
+import com.flexiconvert.converter.interfaces.FormatConverter;
+import com.flexiconvert.converter.converters.*;
+
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import java.io.FileInputStream;
-import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class FileConverterService {
 
-    // Decides the conversion type
-    public void convert(File inputFile, ConversionType type) throws IOException {
-        switch (type) {
-            case TXT_TO_PDF:
-                convertTxtToPdf(inputFile);
-                break;
-            case DOCX_TO_PDF:
-                convertDocxToPdf(inputFile);
-                break;
-            case XLSX_TO_CSV:
-                convertXlsxToCsv(inputFile);
-                break;
-            default:
-                throw new UnsupportedOperationException("Conversion type not supported");
-        }
+    private final Map<ConversionType, FormatConverter> converterMap = new HashMap<>();
+
+    public FileConverterService() {
+        // Register all converters here...
+        converterMap.put(ConversionType.TXT_TO_PDF, new TextToPdfConverter());
+        converterMap.put(ConversionType.DOCX_TO_PDF, new DocxToPdfConverter());
+        converterMap.put(ConversionType.XLSX_TO_CSV, new XlsxToCsvConverter());
+        converterMap.put(ConversionType.PDF_TO_TXT, new PdfToTextConverter());
+        converterMap.put(ConversionType.DOCX_TO_TXT, new DocxToTextConverter());
+        converterMap.put(ConversionType.DOCX_TO_HTML, new DocxToHtmlConverter());
+        converterMap.put(ConversionType.TXT_TO_HTML, new TxtToHtmlConverter());
+        converterMap.put(ConversionType.PDF_TO_IMAGES, new PdfToImagesConverter());
+        converterMap.put(ConversionType.PPTX_TO_IMAGES, new PptxToImagesConverter());
+        converterMap.put(ConversionType.JSON_TO_XML, new JsonToXmlConverter());
+        converterMap.put(ConversionType.XML_TO_JSON, new XmlToJsonConverter());
+        converterMap.put(ConversionType.XML_TO_PDF, new XmlToPdfConverter());
+        converterMap.put(ConversionType.JAVA_TO_TXT, new GenericToTextConverter(".java"));
+        converterMap.put(ConversionType.PY_TO_TXT, new GenericToTextConverter(".py"));
+        converterMap.put(ConversionType.HTML_TO_TXT, new GenericToTextConverter(".html"));
+        converterMap.put(ConversionType.XML_TO_TXT, new GenericToTextConverter(".xml"));
+        converterMap.put(ConversionType.JAVA_TO_PDF, new GenericToPdfConverter(".java"));
+        converterMap.put(ConversionType.PY_TO_PDF, new GenericToPdfConverter(".py"));
+        converterMap.put(ConversionType.HTML_TO_PDF, new GenericToPdfConverter(".html"));
+        converterMap.put(ConversionType.XML_TO_PDF, new GenericToPdfConverter(".xml"));
+        converterMap.put(ConversionType.RTF_TO_TXT, new RtfToTextConverter());
+        converterMap.put(ConversionType.RTF_TO_PDF, new RtfToPdfConverter());
+        converterMap.put(ConversionType.MD_TO_HTML, new MdToHtmlConverter());
+        converterMap.put(ConversionType.MD_TO_PDF, new MdToPdfConverter());
+        converterMap.put(ConversionType.ZIP_TO_FOLDER, new ZipToFolderConverter());
+        converterMap.put(ConversionType.TAR_TO_FOLDER, new TarToFolderConverter());
+        converterMap.put(ConversionType.GZ_TO_FOLDER, new GzToFolderConverter());
     }
 
-    // Converts a .txt file to .pdf using PDFBox
-    private void convertTxtToPdf(File txtFile) throws IOException {
-        PDDocument doc = new PDDocument();
-        PDPage page = new PDPage(PDRectangle.A4);
-        doc.addPage(page);
+    public File convert(File inputFile, ConversionType type) throws IOException {
+        FormatConverter converter = converterMap.get(type);
 
-        PDPageContentStream content = new PDPageContentStream(doc, page);
-        content.beginText();
-        content.setFont(PDType1Font.HELVETICA, 12);
-        content.setLeading(14.5f);
-        content.newLineAtOffset(50,750);
-
-        try(FileInputStream fis = new FileInputStream(txtFile)) {
-            String text = new String(fis.readAllBytes());
-            for(String line : text.split("\n")) {
-                content.showText(line);
-                content.newLine();
-            }
+        if (converter == null) {
+            throw new UnsupportedOperationException("Conversion type not supported: " + type);
         }
+
+        // Create a temporary directory for our work
+        File tempDir = new File(System.getProperty("java.io.tmpdir"), "flexiconvert-temp-" + UUID.randomUUID());
+        tempDir.mkdirs();
+        tempDir.deleteOnExit();
+
+        // Copy the input file to the temp directory
+        String inputFileName = inputFile.getName();
+        File tempInputFile = new File(tempDir, inputFileName);
+        Files.copy(inputFile.toPath(), tempInputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        // Convert using the temp input file
+        converter.convert(tempInputFile);
+
+        // Figure out the output filename
+        String outputExtension = type.name().split("_TO_")[1].toLowerCase();
+        String baseName = inputFileName.substring(0, inputFileName.lastIndexOf('.'));
+        String outputFileName = baseName + "." + outputExtension;
         
-        content.endText();
-        content.close();
-
-        File output = new File(txtFile.getParent(), txtFile.getName().replace(".txt", ".pdf"));
-        doc.save(output);
-        doc.close();
+        // The converter will have created the output in the same temp directory
+        return new File(tempDir, outputFileName);
     }
 
-    // Converts a .docx file to .pdf using PDFBox
-    private void convertDocxToPdf(File docxFile) throws IOException {
-        try (XWPFDocument docx = new XWPFDocument(new FileInputStream(docxFile));
-             PDDocument pdf = new PDDocument()) {
+    /**
+     * Creates a unique filename to avoid overwriting existing files
+     */
+    public File createUniqueFile(File file) {
+        if (!file.exists()) return file;
 
-            PDPage page = new PDPage(PDRectangle.A4);
-            pdf.addPage(page);
+        String name = file.getName();
+        String baseName = name;
+        String extension = "";
+        int dotIndex = name.lastIndexOf('.');
 
-            PDPageContentStream content = new PDPageContentStream(pdf, page);
-            content.beginText();
-            content.setFont(PDType1Font.HELVETICA, 12);
-            content.setLeading(14.5f);
-            content.newLineAtOffset(50, 750);
-
-            for (XWPFParagraph para : docx.getParagraphs()) {
-                content.showText(para.getText());
-                content.newLine();
-            }
-
-            content.endText();
-            content.close();
-
-            File output = new File(docxFile.getParent(), docxFile.getName().replace(".docx", ".pdf"));
-            pdf.save(output);
+        if (dotIndex > 0) {
+            baseName = name.substring(0, dotIndex);
+            extension = name.substring(dotIndex);
         }
+
+        int counter = 1;
+        File newFile;
+
+        do {
+            newFile = new File(file.getParent(), baseName + "-" + counter + extension);
+            counter++;
+        } while (newFile.exists());
+
+        return newFile;
     }
 
-    // Converts a .xlsx file to .csv by flattening the sheet into comma-separated format
-    private void convertXlsxToCsv(File xlsxFile) throws IOException {
-        try (FileInputStream fis = new FileInputStream(xlsxFile);
-             Workbook workbook = new XSSFWorkbook(fis);
-             PrintWriter writer = new PrintWriter(
-                     new FileWriter(xlsxFile.getParent() + "/" + xlsxFile.getName().replace(".xlsx", ".csv")))) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-            for (Row row : sheet) {
-                StringBuilder line = new StringBuilder();
-                for (Cell cell : row) {
-                    line.append(cell.toString()).append(",");
-                }
-                writer.println(line);
-            }
-        }
+    // For legacy calls
+    public void convertLegacy(File inputFile, ConversionType type) throws IOException {
+        convert(inputFile, type);
     }
 }

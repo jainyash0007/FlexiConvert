@@ -51,6 +51,48 @@
         <artifactId>jackson-databind</artifactId>
         <version>2.15.3</version>
     </dependency>
+
+    <!-- XML mapper for JSON ↔ XML conversion -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-xml</artifactId>
+      <version>2.15.3</version>
+    </dependency>
+
+    <!-- SLF4J (Logging API) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.9</version>
+    </dependency>
+
+    <!-- Logback (Actual logger implementation) -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.4.14</version>
+    </dependency>
+
+    <dependency>
+    <groupId>com.formdev</groupId>
+    <artifactId>flatlaf</artifactId>
+    <version>3.2</version>
+    </dependency>
+
+    <!-- Markdown support -->
+    <dependency>
+    <groupId>org.commonmark</groupId>
+    <artifactId>commonmark</artifactId>
+    <version>0.21.0</version>
+    </dependency>
+
+    <!-- File compress -->
+    <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-compress</artifactId>
+    <version>1.26.1</version>
+    </dependency>
+
   </dependencies>
 
   <build>

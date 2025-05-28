@@ -1,6 +1,8 @@
-package com.flexiconvert.converter;
+package com.flexiconvert;
 
 import javax.swing.SwingUtilities;
+
+import com.flexiconvert.ui.MainWindow;
 
 public class App {
     public static void main(String[] args) {

@@ -12,4 +12,7 @@ target/
 Thumbs.db
 
 # Sample Files
-sampleDocs/
+src/test/resources/sampleDocs
+
+# Application Logs
+logs/

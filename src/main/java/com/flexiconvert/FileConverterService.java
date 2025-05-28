@@ -16,7 +16,6 @@ public class FileConverterService {
     private final Map<ConversionType, FormatConverter> converterMap = new HashMap<>();
 
     public FileConverterService() {
-        // Register all converters here...
         converterMap.put(ConversionType.TXT_TO_PDF, new TextToPdfConverter());
         converterMap.put(ConversionType.DOCX_TO_PDF, new DocxToPdfConverter());
         converterMap.put(ConversionType.XLSX_TO_CSV, new XlsxToCsvConverter());
@@ -50,6 +49,9 @@ public class FileConverterService {
         converterMap.put(ConversionType.WEBP_TO_PNG, new WebpToPngConverter());
         converterMap.put(ConversionType.DOCX_MEDIA_TO_IMAGES, new DocxMediaToImagesConverter());
         converterMap.put(ConversionType.PPTX_MEDIA_TO_IMAGES, new PptxMediaToImagesConverter());
+        converterMap.put(ConversionType.CSV_TO_JSON, new CsvToJsonConverter());
+        converterMap.put(ConversionType.JSON_TO_CSV, new JsonToCsvConverter());
+        converterMap.put(ConversionType.CSV_TO_XML, new CsvToXmlConverter());
     }
 
     public File convert(File inputFile, ConversionType type) throws IOException {

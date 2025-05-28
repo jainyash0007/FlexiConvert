@@ -61,12 +61,12 @@
 ## 📦 Installation
 
 ### 🪟 Windows
-- [Download the latest `.exe` installer](https://github.com/your-username/your-repo/releases)
+- [Download the latest `.exe` installer](https://github.com/jainyash0007/FlexiConvert/releases)
 - Run the installer and follow the on-screen instructions
 - Launch FlexiConvert from the Start Menu or desktop shortcut
 
 ### 🐧 macOS / Linux
-- [Download the latest `.jar` file](https://github.com/your-username/your-repo/releases)
+- [Download the latest `.jar` file](https://github.com/jainyash0007/FlexiConvert/releases)
 - Run using:
   ```bash
   java -jar offline-file-converter-1.0.0-shaded.jar
@@ -102,7 +102,7 @@ Toggle between light and dark mode using the theme icon in the bottom-right corn
 ## 🛠️ Building from Source
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
+git clone https://github.com/jainyash0007/FlexiConvert.git
 cd offline-file-converter
 mvn clean package
 java -jar target/offline-file-converter-1.0.0-shaded.jar

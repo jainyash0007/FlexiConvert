@@ -52,6 +52,8 @@ public class FileConverterService {
         converterMap.put(ConversionType.CSV_TO_JSON, new CsvToJsonConverter());
         converterMap.put(ConversionType.JSON_TO_CSV, new JsonToCsvConverter());
         converterMap.put(ConversionType.CSV_TO_XML, new CsvToXmlConverter());
+        converterMap.put(ConversionType.PPTX_TO_PDF, new PptxToPdfConverter());
+        converterMap.put(ConversionType.XLSX_TO_PDF, new XlsxToPdfConverter());
     }
 
     public File convert(File inputFile, ConversionType type) throws IOException {

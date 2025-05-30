@@ -21,7 +21,11 @@ public class MainWindow extends JFrame {
     private final JButton convertButton;
     private final JTextArea resultLog;
 
-    public MainWindow() {
+    private final FileConverterService fileConverterService;
+
+    public MainWindow(FileConverterService fileConverterService) {
+        this.fileConverterService = fileConverterService;
+
         setTitle("FlexiConvert");
         setSize(850, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -43,19 +47,34 @@ public class MainWindow extends JFrame {
         resultLog = new JTextArea(8, 50);
         resultLog.setEditable(false);
         JScrollPane logScroll = new JScrollPane(resultLog);
-        logScroll.setBorder(BorderFactory.createTitledBorder("Conversion Log"));
+        // logScroll.setBorder(BorderFactory.createTitledBorder("Conversion Log"));
 
         JPanel top = new JPanel(new BorderLayout());
         top.add(fileInputPanel, BorderLayout.NORTH);
         top.add(formatSelectionPanel, BorderLayout.SOUTH);
 
-        JPanel center = new JPanel(new BorderLayout(10, 10));
-        center.add(outputPanel, BorderLayout.NORTH);
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel center = new JPanel();
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+
+        center.add(outputPanel);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         convertButton.setPreferredSize(new Dimension(150, 40));
+        convertButton.setMaximumSize(new Dimension(200, 40));
         buttonPanel.add(convertButton);
-        center.add(buttonPanel, BorderLayout.CENTER);
-        center.add(logScroll, BorderLayout.SOUTH);
+
+        // Add vertical spacing between output panel and button
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        center.add(buttonPanel);
+
+        // Wrap log scroll pane in a titled panel to help vertical sizing
+        JPanel logPanel = new JPanel(new BorderLayout());
+        logPanel.setBorder(BorderFactory.createTitledBorder("Conversion Log"));
+        logPanel.add(logScroll, BorderLayout.CENTER);
+
+        // Add log panel last so it takes remaining space
+        center.add(logPanel);
 
         add(top, BorderLayout.NORTH);
         add(center, BorderLayout.CENTER);
@@ -95,10 +114,8 @@ public class MainWindow extends JFrame {
         ConversionType type = typeOpt.get();
 
         try {
-            FileConverterService service = new FileConverterService();
-            
             // Always convert to a temporary file first
-            File tempOutput = service.convert(inputFile, type);
+            File tempOutput = fileConverterService.convert(inputFile, type);
             
             // Store the temporary output file for the Download button
             outputPanel.setLastOutputFile(tempOutput);
@@ -106,7 +123,7 @@ public class MainWindow extends JFrame {
             // If using default output directory, also save a copy there now
             File outputDir = outputPanel.getOutputDirectory();
             if (outputDir != null) {
-                File uniqueDestFile = service.createUniqueFile(new File(outputDir, tempOutput.getName()));
+                File uniqueDestFile = fileConverterService.createUniqueFile(new File(outputDir, tempOutput.getName()));
                 Files.copy(tempOutput.toPath(), uniqueDestFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 resultLog.append("✅ Saved to default output: " + uniqueDestFile.getAbsolutePath() + "\n");
             } else {

@@ -15,11 +15,11 @@ public class OutputPanel extends JPanel {
     private final JButton openOutputFolderButton;
     private final JLabel outputStatusLabel;
 
-    private File defaultOutputDir = new File(System.getProperty("user.home") + File.separator + "FlexiConvert-Output");
+    private File defaultOutputDir = new File(System.getProperty("user.home") + File.separator + "Desktop/FlexiConvert-Output");
     private File lastOutputFile;
 
     public OutputPanel() {
-        setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        setLayout(new BorderLayout(10, 10));
         setBorder(new TitledBorder("Output Options"));
 
         downloadButton = new JButton("Download...");
@@ -28,11 +28,14 @@ public class OutputPanel extends JPanel {
         openOutputFolderButton = new JButton("Open Output Folder");
         outputStatusLabel = new JLabel("Default: " + defaultOutputDir.getAbsolutePath());
 
-        add(downloadButton);
-        add(useDefaultDirToggle);
-        add(changeDefaultDirButton);
-        add(openOutputFolderButton);
-        add(outputStatusLabel);
+        JPanel leftButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftButtonsPanel.add(downloadButton);
+        leftButtonsPanel.add(useDefaultDirToggle);
+        leftButtonsPanel.add(changeDefaultDirButton);
+        leftButtonsPanel.add(openOutputFolderButton);
+
+        add(leftButtonsPanel, BorderLayout.CENTER);
+        add(outputStatusLabel, BorderLayout.SOUTH);
 
         createDefaultDirIfNeeded();
 
@@ -76,6 +79,7 @@ public class OutputPanel extends JPanel {
                 ? "Default: " + defaultOutputDir.getAbsolutePath()
                 : "Manual selection on each download";
         outputStatusLabel.setText(path);
+        outputStatusLabel.setToolTipText(outputStatusLabel.getText());
     }
 
     private void openDirectory(File dir) {

@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.text.TextContentRenderer;
@@ -12,6 +16,9 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.io.*;
 
+
+@Component
+@ConverterFor(ConversionType.MD_TO_PDF)
 public class MdToPdfConverter implements FormatConverter {
 
     @Override

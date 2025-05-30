@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -9,6 +13,9 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.io.*;
 
+
+@Component
+@ConverterFor(ConversionType.TXT_TO_PDF)
 public class TextToPdfConverter implements FormatConverter {
 
     @Override

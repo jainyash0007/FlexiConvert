@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 
@@ -9,6 +13,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
+
+@Component
+@ConverterFor(ConversionType.PPTX_TO_IMAGES)
 public class PptxToImagesConverter implements FormatConverter {
 
     @Override

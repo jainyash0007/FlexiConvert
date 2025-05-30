@@ -1,8 +1,8 @@
 package com.flexiconvert;
 
-import com.flexiconvert.FileConverterService;
-import com.flexiconvert.ConversionType;
+import com.flexiconvert.config.AppConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.File;
 import java.net.URL;
@@ -12,12 +12,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RegressionMatrixTest {
 
+    private final FileConverterService service;
+
+    public RegressionMatrixTest() {
+        try (var ctx = new AnnotationConfigApplicationContext(AppConfig.class)) {
+            service = ctx.getBean(FileConverterService.class);
+        }
+    }
+
     @Test
     public void testSampleDocsForEachConverter() throws Exception {
-        FileConverterService service = new FileConverterService();
-
         for (ConversionType type : EnumSet.allOf(ConversionType.class)) {
-            String from = type.name().split("_TO_")[0].toLowerCase();
+            String from = switch (type) {
+                case DOCX_MEDIA_TO_IMAGES -> "docx";
+                case PPTX_MEDIA_TO_IMAGES -> "pptx";
+                case PDF_MEDIA_TO_IMAGES  -> "pdf";
+                default -> type.name().split("_TO_")[0].toLowerCase();
+            };
             String resourcePath = "sampleDocs/sample." + from;
 
             URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
@@ -37,7 +48,10 @@ public class RegressionMatrixTest {
 
             boolean outputExists;
 
-            if (type == ConversionType.PDF_TO_IMAGES || type == ConversionType.PPTX_TO_IMAGES) {
+            if (type.name().endsWith("_MEDIA_TO_IMAGES")) {
+                File[] matches = output.listFiles((dir, name) -> name.matches(".*\\.(png|jpg|jpeg|gif|bmp)$"));
+                outputExists = matches != null && matches.length > 0;
+            } else if (type == ConversionType.PDF_TO_IMAGES || type == ConversionType.PPTX_TO_IMAGES) {
                 File parentDir = output.getParentFile();
                 String base = output.getName().replaceAll("[.][^.]+$", "");
                 File[] matches = parentDir.listFiles((dir, name) ->
@@ -47,6 +61,13 @@ public class RegressionMatrixTest {
                 outputExists = output.exists() && output.isDirectory();
             } else {
                 outputExists = output.exists();
+            }
+
+            // System.out.println("🧪 Checking output path for " + type + ": " + output.getAbsolutePath());
+            // System.out.println("🧪 Output exists? " + output.exists());
+
+            if (!output.exists()) {
+                Thread.sleep(200);
             }
 
             assertTrue(outputExists, "Output should exist for: " + type);

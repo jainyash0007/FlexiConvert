@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
@@ -14,6 +18,9 @@ import java.io.IOException;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
+
+@Component
+@ConverterFor(ConversionType.PDF_MEDIA_TO_IMAGES)
 public class PdfMediaToImagesConverter implements FormatConverter {
 
     @Override
@@ -27,10 +34,10 @@ public class PdfMediaToImagesConverter implements FormatConverter {
 
             for (PDPage page : document.getPages()) {
                 PDResources resources = page.getResources();
+                if (resources == null) continue;
 
                 for (COSName xObjectName : resources.getXObjectNames()) {
                     PDXObject xObject = resources.getXObject(xObjectName);
-
                     if (xObject instanceof PDImageXObject image) {
                         File imgFile = new File(outputDir, "image" + imgIndex + ".png");
                         try (FileOutputStream out = new FileOutputStream(imgFile)) {

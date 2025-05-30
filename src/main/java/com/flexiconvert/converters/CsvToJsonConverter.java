@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -9,6 +13,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
+
+@Component
+@ConverterFor(ConversionType.CSV_TO_JSON)
 public class CsvToJsonConverter implements FormatConverter {
     @Override
     public void convert(File inputFile) throws IOException {

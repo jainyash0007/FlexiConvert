@@ -2,13 +2,20 @@ package com.flexiconvert.converters;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
+
+@Component
+@ConverterFor(ConversionType.JSON_TO_CSV)
 public class JsonToCsvConverter implements FormatConverter {
     @Override
     public void convert(File inputFile) throws IOException {

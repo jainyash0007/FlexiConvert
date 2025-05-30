@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,6 +14,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+
+@Component
+@ConverterFor(ConversionType.JSON_TO_XML)
 public class JsonToXmlConverter implements FormatConverter {
 
     @Override

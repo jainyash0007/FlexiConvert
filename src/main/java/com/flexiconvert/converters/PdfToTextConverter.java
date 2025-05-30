@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
@@ -8,6 +12,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+
+@Component
+@ConverterFor(ConversionType.PDF_TO_TXT)
 public class PdfToTextConverter implements FormatConverter {
 
     @Override

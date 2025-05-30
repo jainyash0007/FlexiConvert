@@ -1,7 +1,10 @@
 package com.flexiconvert.converters;
 
 import com.flexiconvert.AbstractConverterTest;
+import com.flexiconvert.config.AppConfig;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,14 +25,27 @@ public class ZipToFolderConverterTest extends AbstractConverterTest {
             zos.closeEntry();
         }
 
-        ZipToFolderConverter converter = new ZipToFolderConverter();
-        converter.convert(zipFile);
+        try (var ctx = new AnnotationConfigApplicationContext(AppConfig.class)) {
+            ZipToFolderConverter converter = ctx.getBean(ZipToFolderConverter.class);
+            converter.convert(zipFile);
 
-        File outputFolder = new File(tempDir.toFile(), "test_unzipped");
-        File extracted = new File(outputFolder, "hello.txt");
+            File outputFolder = new File(tempDir.toFile(), "test_unzipped");
+            File extracted = new File(outputFolder, "hello.txt");
 
-        assertTrue(extracted.exists(), "Extracted file should exist");
-        String content = Files.readString(extracted.toPath());
-        assertEquals("Hello from zip!", content.trim());
+            assertTrue(extracted.exists(), "Extracted file should exist");
+            String content = Files.readString(extracted.toPath());
+            assertEquals("Hello from zip!", content.trim());
+        }
+    }
+
+    @Test
+    public void testInvalidZipFileThrowsException() throws Exception {
+        // Create a file with a .zip extension but invalid content
+        File fakeZip = createTempFile("corrupt.zip", "not-a-real-zip-content");
+
+        try (var ctx = new AnnotationConfigApplicationContext(AppConfig.class)) {
+            ZipToFolderConverter converter = ctx.getBean(ZipToFolderConverter.class);
+            assertThrows(IOException.class, () -> converter.convert(fakeZip), "Should throw IOException for corrupt zip");
+        }
     }
 }

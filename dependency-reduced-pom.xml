@@ -22,7 +22,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <mainClass>com.flexiconvert.converter.App</mainClass>
+          <mainClass>com.flexiconvert.App</mainClass>
         </configuration>
       </plugin>
       <plugin>
@@ -45,6 +45,10 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M9</version>
       </plugin>
     </plugins>
   </build>

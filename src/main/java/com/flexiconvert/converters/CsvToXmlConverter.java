@@ -1,12 +1,18 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
+
+@Component
+@ConverterFor(ConversionType.CSV_TO_XML)
 public class CsvToXmlConverter implements FormatConverter {
     @Override
     public void convert(File inputFile) throws IOException {

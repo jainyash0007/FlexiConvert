@@ -17,6 +17,14 @@
   </properties>
 
   <dependencies>
+
+    <!-- Spring Core (Context + DI) -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>6.1.5</version>
+    </dependency>
+    
     <!-- JUnit 5 -->
       <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -95,9 +103,9 @@
 
     <!-- Plugin for webp conversions -->
     <dependency>
-    <groupId>com.twelvemonkeys.imageio</groupId>
-    <artifactId>imageio-webp</artifactId>
-    <version>3.9.4</version>
+      <groupId>org.sejda.imageio</groupId>
+      <artifactId>webp-imageio</artifactId>
+      <version>0.1.6</version>
     </dependency>
     <dependency>
     <groupId>com.twelvemonkeys.imageio</groupId>
@@ -130,7 +138,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <mainClass>com.flexiconvert.converter.App</mainClass> <!-- No need to mention Main class in the mvn exec:java command -->
+          <mainClass>com.flexiconvert.App</mainClass>
         </configuration>
       </plugin>
 
@@ -155,6 +163,12 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M9</version>
       </plugin>
 
     </plugins>

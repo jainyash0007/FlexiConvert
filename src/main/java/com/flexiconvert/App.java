@@ -1,15 +1,18 @@
 package com.flexiconvert;
 
-import javax.swing.SwingUtilities;
-
+import com.flexiconvert.config.AppConfig;
 import com.flexiconvert.ui.MainWindow;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import javax.swing.SwingUtilities;
 
 public class App {
     public static void main(String[] args) {
-        // invokeLater to ensure GUI creation is on the Event Dispatch Thread
-        // and to avoid blocking the main thread
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        FileConverterService converterService = context.getBean(FileConverterService.class);
+
         SwingUtilities.invokeLater(() -> {
-            MainWindow window = new MainWindow();
+            MainWindow window = new MainWindow(converterService); // updated constructor
             window.setVisible(true);
         });
     }

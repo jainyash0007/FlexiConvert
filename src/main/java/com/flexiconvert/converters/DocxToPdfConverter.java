@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -15,6 +19,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+@Component
+@ConverterFor(ConversionType.DOCX_TO_PDF)
 public class DocxToPdfConverter implements FormatConverter {
 
     @Override
@@ -32,7 +38,7 @@ public class DocxToPdfConverter implements FormatConverter {
             content.newLineAtOffset(50, 750);
 
             for (XWPFParagraph para : docx.getParagraphs()) {
-                content.showText(para.getText());
+                content.showText(para.getText().replace("\t", "    "));
                 content.newLine();
             }
 

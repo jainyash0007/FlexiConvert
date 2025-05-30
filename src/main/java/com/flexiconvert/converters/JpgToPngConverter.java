@@ -1,12 +1,18 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+
+@Component
+@ConverterFor(ConversionType.JPG_TO_PNG)
 public class JpgToPngConverter implements FormatConverter {
 
     @Override

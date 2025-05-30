@@ -1,11 +1,18 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 
 import java.io.*;
 
+
+@Component
+@ConverterFor(ConversionType.DOCX_TO_TXT)
 public class DocxToTextConverter implements FormatConverter {
 
     @Override

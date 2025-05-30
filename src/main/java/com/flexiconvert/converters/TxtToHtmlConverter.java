@@ -1,9 +1,15 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 
+
+@Component
+@ConverterFor(ConversionType.TXT_TO_HTML)
 public class TxtToHtmlConverter implements FormatConverter {
 
     @Override

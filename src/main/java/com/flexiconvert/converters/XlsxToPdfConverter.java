@@ -1,51 +1,71 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
+import com.flexiconvert.annotations.ConverterFor;
 import com.flexiconvert.interfaces.FormatConverter;
+
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.stereotype.Component;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.io.*;
 import java.nio.file.Files;
 
+@Component
+@ConverterFor(ConversionType.XLSX_TO_PDF)
 public class XlsxToPdfConverter implements FormatConverter {
 
     @Override
     public void convert(File inputFile) throws IOException {
         try (Workbook workbook = WorkbookFactory.create(inputFile)) {
-            Sheet sheet = workbook.getSheetAt(0);  // first sheet
             File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
 
             try (PDDocument pdf = new PDDocument()) {
-                PDPage page = new PDPage(PDRectangle.LETTER);
-                pdf.addPage(page);
-
-                PDPageContentStream content = new PDPageContentStream(pdf, page);
                 PDType1Font font = PDType1Font.HELVETICA;
                 float fontSize = 10;
                 float margin = 50;
-                float yStart = page.getMediaBox().getHeight() - margin;
-                float y = yStart;
                 float rowHeight = 20;
-                float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
+                float tableWidth = PDRectangle.LETTER.getWidth() - 2 * margin;
 
-                for (Row row : sheet) {
-                    float x = margin;
-                    for (Cell cell : row) {
-                        String text = getCellText(cell);
+                for (int s = 0; s < workbook.getNumberOfSheets(); s++) {
+                    Sheet sheet = workbook.getSheetAt(s);
+                    PDPage page = new PDPage(PDRectangle.LETTER);
+                    pdf.addPage(page);
+
+                    PDPageContentStream content = new PDPageContentStream(pdf, page);
+                    content.setFont(font, fontSize);
+                    content.setLeading(14.5f);
+
+                    float y = PDRectangle.LETTER.getHeight() - margin;
+                    int lineCount = 0;
+
+                    for (Row row : sheet) {
                         content.beginText();
                         content.setFont(font, fontSize);
-                        content.newLineAtOffset(x, y);
-                        content.showText(text);
+                        content.newLineAtOffset(margin, y - lineCount * rowHeight);
+
+                        StringBuilder rowText = new StringBuilder();
+                        for (Cell cell : row) {
+                            rowText.append(getCellText(cell).replace("\t", "    ")).append("    ");
+                        }
+
+                        content.showText(rowText.toString().trim());
                         content.endText();
-                        x += tableWidth / row.getLastCellNum();
+                        lineCount++;
+
+                        if ((y - lineCount * rowHeight) < margin) {
+                            content.close();
+                            page = new PDPage(PDRectangle.LETTER);
+                            pdf.addPage(page);
+                            content = new PDPageContentStream(pdf, page);
+                            y = PDRectangle.LETTER.getHeight() - margin;
+                        }
                     }
-                    y -= rowHeight;
-                    if (y < margin) break;  // simple pagination logic
+                    content.close();
                 }
 
-                content.close();
                 pdf.save(outputFile);
             }
         }

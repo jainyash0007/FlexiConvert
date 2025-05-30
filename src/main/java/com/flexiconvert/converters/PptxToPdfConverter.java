@@ -1,6 +1,10 @@
 package com.flexiconvert.converters;
 
+import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.annotations.ConverterFor;
+import org.springframework.stereotype.Component;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -17,6 +21,9 @@ import java.io.*;
 
 import javax.imageio.ImageIO;
 
+
+@Component
+@ConverterFor(ConversionType.PPTX_TO_PDF)
 public class PptxToPdfConverter implements FormatConverter {
 
     @Override

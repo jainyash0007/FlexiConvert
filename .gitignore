@@ -4,6 +4,7 @@ target/
 *.class
 *.jar
 dist/
+installer/
 
 # VSCode
 .vscode/

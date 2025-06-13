@@ -5,7 +5,7 @@
   <groupId>com.flexiconvert.converter</groupId>
   <artifactId>offline-file-converter</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <name>Offline File Converter</name>
   <description>Fully offline desktop app to convert files securely.</description>
   <url>http://localhost</url> <!-- Local placeholder -->

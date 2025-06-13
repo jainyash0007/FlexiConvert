@@ -31,7 +31,7 @@ public class DocxToTextConverterTest extends AbstractConverterTest {
 
             File output = getOutputFile(input, "txt");
             assertTrue(output.exists(), "Text file should be created from DOCX");
-            String content = Files.readString(output.toPath());
+            String content = Files.readString(output.toPath(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(content.contains("Extract this text."), "Text file should contain expected content");
         }
     }
@@ -50,7 +50,7 @@ public class DocxToTextConverterTest extends AbstractConverterTest {
 
             File output = getOutputFile(input, "txt");
             assertTrue(output.exists(), "Text file should be created for empty DOCX");
-            String content = Files.readString(output.toPath());
+            String content = Files.readString(output.toPath(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(content.isBlank(), "Text file should be empty for empty DOCX");
         }
     }

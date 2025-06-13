@@ -19,8 +19,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
-import javax.imageio.ImageIO;
-
 
 @Component
 @ConverterFor(ConversionType.PPTX_TO_PDF)

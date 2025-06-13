@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.io.*;
-import java.nio.file.Files;
 
 @Component
 @ConverterFor(ConversionType.XLSX_TO_PDF)

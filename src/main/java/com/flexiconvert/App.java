@@ -8,12 +8,13 @@ import javax.swing.SwingUtilities;
 
 public class App {
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        FileConverterService converterService = context.getBean(FileConverterService.class);
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class)) {
+            FileConverterService converterService = context.getBean(FileConverterService.class);
 
-        SwingUtilities.invokeLater(() -> {
-            MainWindow window = new MainWindow(converterService); // updated constructor
-            window.setVisible(true);
-        });
+            SwingUtilities.invokeLater(() -> {
+                MainWindow window = new MainWindow(converterService); // updated constructor
+                window.setVisible(true);
+            });
+        }
     }
 }

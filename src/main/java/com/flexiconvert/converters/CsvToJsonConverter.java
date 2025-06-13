@@ -4,56 +4,91 @@ import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
 import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.commons.csv.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
-
+import java.util.logging.Logger;
 
 @Component
 @ConverterFor(ConversionType.CSV_TO_JSON)
 public class CsvToJsonConverter implements FormatConverter {
+
+    private static final Logger LOGGER = Logger.getLogger(CsvToJsonConverter.class.getName());
+
+    // Config flags
+    private final boolean warnOnMismatch = true;
+    private final boolean skipMalformedRows = false;
+    private final boolean fillMissingFields = true;
+
     @Override
     public void convert(File inputFile) throws IOException {
-        List<Map<String, String>> records = new ArrayList<>();
+        List<Map<String, Object>> records = new ArrayList<>();
+        List<String> headers = null;
 
-        try (BufferedReader reader = Files.newBufferedReader(inputFile.toPath(), StandardCharsets.UTF_8)) {
-            // Read header line
-            String headerLine = reader.readLine();
-            if (headerLine == null) {
-                throw new IOException("CSV file is empty.");
-            }
-
-            // Split the header by comma
-            String[] headers = headerLine.split(",");
-            // Trim header values to remove any extra spaces
-            for (int i = 0; i < headers.length; i++) {
-                headers[i] = headers[i].trim();
-            }
-
-            // Read data rows
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Split the data line by comma
-                String[] values = line.split(",", -1); // -1 preserves empty fields
-                Map<String, String> record = new LinkedHashMap<>();
-
-                // Create a map of header -> value for each row
-                for (int i = 0; i < headers.length; i++) {
-                    record.put(headers[i], i < values.length ? values[i].trim() : "");
+        try (
+            Reader reader = new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8);
+            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT
+                .withTrim(true)
+                .withIgnoreSurroundingSpaces()
+                .withIgnoreEmptyLines()
+                .withAllowMissingColumnNames()
+                .withSkipHeaderRecord(false)) // Treat all rows as data
+        ) {
+            Iterator<CSVRecord> iterator = parser.iterator();
+                if (!iterator.hasNext()) {
+                    throw new IOException("CSV file is empty or contains no rows.");
                 }
-                records.add(record);
+
+                while (iterator.hasNext()) {
+                    CSVRecord csvRecord = iterator.next();
+                    if (headers == null) {
+                        headers = new ArrayList<>();
+                        for (int i = 0; i < csvRecord.size(); i++) {
+                            headers.add("__" + i);
+                        }
+                    }
+                if (headers == null) {
+                    headers = new ArrayList<>();
+                    for (int i = 0; i < csvRecord.size(); i++) {
+                        headers.add("__" + i);
+                    }
+                }
+
+                int actualSize = csvRecord.size();
+                int expectedSize = headers.size();
+
+                if (actualSize < expectedSize && warnOnMismatch) {
+                    LOGGER.warning("Row " + csvRecord.getRecordNumber()
+                            + " has fewer values than headers (" + actualSize + " < " + expectedSize + ")");
+                }
+
+                if (skipMalformedRows && actualSize < expectedSize) {
+                    continue;
+                }
+
+                Map<String, Object> jsonRow = new LinkedHashMap<>();
+
+                for (int i = 0; i < expectedSize; i++) {
+                    String header = headers.get(i);
+                    String value = i < actualSize ? csvRecord.get(i) : "";
+                    jsonRow.put(header, parseTypedValue(value));
+                }
+
+                if (fillMissingFields && actualSize < expectedSize) {
+                    for (int j = actualSize; j < expectedSize; j++) {
+                        jsonRow.put("MISSING_FIELD_" + j, "");
+                    }
+                }
+
+                records.add(jsonRow);
             }
         }
 
-        // Create output file in the same folder with .json extension
         File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
-
-        // Use Jackson to write the JSON
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -63,12 +98,23 @@ public class CsvToJsonConverter implements FormatConverter {
         }
     }
 
+    private String cleanKey(String raw) {
+        return raw == null ? "" : raw.replaceAll("[\"\\n\\r]+", " ").trim();
+    }
+
+    private Object parseTypedValue(String val) {
+        if (val == null || val.isBlank()) return "";
+        try {
+            if (val.contains(".")) return Double.parseDouble(val);
+            return Integer.parseInt(val);
+        } catch (NumberFormatException ex) {
+            return val;
+        }
+    }
+
     private String getOutputFileName(File inputFile) {
         String name = inputFile.getName();
         int dotIndex = name.lastIndexOf('.');
-        if (dotIndex != -1) {
-            name = name.substring(0, dotIndex);
-        }
-        return name + ".json";
+        return (dotIndex != -1 ? name.substring(0, dotIndex) : name) + ".json";
     }
 }

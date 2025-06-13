@@ -101,6 +101,13 @@
     <version>1.26.1</version>
     </dependency>
 
+    <!-- Csv parsing -->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-csv</artifactId>
+        <version>1.10.0</version>
+    </dependency>
+
     <!-- Plugin for webp conversions -->
     <dependency>
       <groupId>org.sejda.imageio</groupId>

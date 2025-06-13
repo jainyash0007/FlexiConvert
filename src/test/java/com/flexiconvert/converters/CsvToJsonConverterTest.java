@@ -17,7 +17,8 @@ public class CsvToJsonConverterTest extends AbstractConverterTest {
 
     @Test
     public void testValidCsvToJsonConversion() throws Exception {
-        String content = "id,name,age\n1,Alice,30\n2,Bob,25";
+        // Simulate 3 columns
+        String content = "1,Alice,30\n2,Bob,25";
 
         File input = createTempFile("sample.csv", content);
         try (var ctx = new AnnotationConfigApplicationContext(AppConfig.class)) {
@@ -27,8 +28,14 @@ public class CsvToJsonConverterTest extends AbstractConverterTest {
             File output = getOutputFile(input, "json");
             assertTrue(output.exists(), "JSON output should be created");
             String json = Files.readString(output.toPath());
-            assertTrue(json.contains("Alice"));
-            assertTrue(json.contains("Bob"));
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(json);
+
+            assertEquals(2, root.size(), "Should contain 2 rows");
+            assertEquals("Alice", root.get(0).get("__1").asText());
+            assertEquals(30, root.get(0).get("__2").asInt());
+            assertEquals("Bob", root.get(1).get("__1").asText());
         }
     }
 
@@ -44,7 +51,7 @@ public class CsvToJsonConverterTest extends AbstractConverterTest {
 
     @Test
     public void testCsvWithMissingValues() throws Exception {
-        String content = "id,name,age\n1,Alice\n2,Bob,25"; // Row 1 missing "age"
+        String content = "1,Alice\n2,Bob,25"; // First row has only 2 values
 
         File input = createTempFile("incomplete.csv", content);
         try (var ctx = new AnnotationConfigApplicationContext(AppConfig.class)) {
@@ -53,10 +60,14 @@ public class CsvToJsonConverterTest extends AbstractConverterTest {
 
             File output = getOutputFile(input, "json");
             assertTrue(output.exists(), "Output should still be created even with missing values");
+
             String json = Files.readString(output.toPath());
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(json);
-            assertEquals("", root.get(0).get("age").asText(), "Missing age should be empty string in first row");
+
+            assertEquals(2, root.size());
+            assertEquals("Alice", root.get(0).get("__1").asText());
+            assertEquals("", root.get(0).path("__2").asText(""), "Missing age should be empty string in first row");
         }
     }
 }

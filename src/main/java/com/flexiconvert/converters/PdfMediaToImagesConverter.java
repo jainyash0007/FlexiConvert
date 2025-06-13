@@ -15,7 +15,6 @@ import org.apache.pdfbox.cos.COSName;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Map;
 import javax.imageio.ImageIO;
 
 

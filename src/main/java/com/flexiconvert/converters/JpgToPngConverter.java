@@ -3,10 +3,9 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.ImageConverterUtil;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -17,14 +16,6 @@ public class JpgToPngConverter implements FormatConverter {
 
     @Override
     public void convert(File inputFile) throws IOException {
-        BufferedImage image = ImageIO.read(inputFile);
-        if (image == null) {
-            throw new IOException("Failed to read image: " + inputFile.getName());
-        }
-
-        File output = new File(inputFile.getParent(),
-                inputFile.getName().replaceAll("(?i)\\.jpg$", ".png"));
-
-        ImageIO.write(image, "png", output);
+        ImageConverterUtil.convertImage(inputFile, "jpg", "png");
     }
 }

@@ -3,6 +3,8 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.annotations.ConverterFor;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.util.ArchiveExtractionUtil;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -20,28 +22,12 @@ public class ZipToFolderConverter implements FormatConverter {
         validateZipFile(zipFile);
         
         // Get base name for output folder
-        String baseName = zipFile.getName();
-        if (baseName.toLowerCase().endsWith(".zip")) {
-            baseName = baseName.substring(0, baseName.length() - 4);
-        }
+        String baseName = FileNameUtil.getBaseName(zipFile, "zip");
 
-        // Create the output directory for actual file extraction
-        // This is what unit tests look for
-        File extractionFolder = new File(zipFile.getParent(), baseName + "_unzipped");
-        if (!extractionFolder.exists()) {
-            if (!extractionFolder.mkdirs()) {
-                throw new IOException("Failed to create extraction directory: " + extractionFolder);
-            }
-        }
-        
-        // Create a marker directory with .folder extension
-        // This is what RegressionMatrixTest looks for
-        File markerFolder = new File(zipFile.getParent(), baseName + ".folder");
-        if (!markerFolder.exists()) {
-            if (!markerFolder.mkdirs()) {
-                throw new IOException("Failed to create marker directory: " + markerFolder);
-            }
-        }
+        // Create extraction and marker folders
+        File[] folders = ArchiveExtractionUtil.createExtractionFolders(zipFile, baseName, "_unzipped");
+        File extractionFolder = folders[0];
+        File markerFolder = folders[1];
         
         // Extract contents
         try (ZipInputStream zipStream = new ZipInputStream(new FileInputStream(zipFile))) {
@@ -54,11 +40,7 @@ public class ZipToFolderConverter implements FormatConverter {
                 File entryFile = new File(extractionFolder, entry.getName());
                 
                 // Check for zip slip vulnerability
-                String canonicalDestinationPath = entryFile.getCanonicalPath();
-                String canonicalOutputFolderPath = extractionFolder.getCanonicalPath();
-                if (!canonicalDestinationPath.startsWith(canonicalOutputFolderPath + File.separator)) {
-                    throw new IOException("Entry is outside of the target directory: " + entry.getName());
-                }
+                ArchiveExtractionUtil.validateEntryPath(entryFile, extractionFolder, entry.getName());
                 
                 // Handle directory entries
                 if (entry.isDirectory()) {

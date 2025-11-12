@@ -3,6 +3,7 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.annotations.ConverterFor;
 import com.flexiconvert.interfaces.FormatConverter;
+import com.flexiconvert.util.FileNameUtil;
 
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -19,7 +20,7 @@ public class XlsxToPdfConverter implements FormatConverter {
     @Override
     public void convert(File inputFile) throws IOException {
         try (Workbook workbook = WorkbookFactory.create(inputFile)) {
-            File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
+            File outputFile = new File(inputFile.getParent(), FileNameUtil.getOutputFileName(inputFile, "pdf"));
 
             try (PDDocument pdf = new PDDocument()) {
                 PDType1Font font = PDType1Font.HELVETICA;
@@ -79,14 +80,5 @@ public class XlsxToPdfConverter implements FormatConverter {
             case BLANK -> "";
             default -> "[Unsupported]";
         };
-    }
-
-    private String getOutputFileName(File inputFile) {
-        String name = inputFile.getName();
-        int dotIndex = name.lastIndexOf('.');
-        if (dotIndex != -1) {
-            name = name.substring(0, dotIndex);
-        }
-        return name + ".pdf";
     }
 }

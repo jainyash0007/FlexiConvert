@@ -3,6 +3,7 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.CsvParsingUtil;
 import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 import org.apache.commons.csv.*;
@@ -26,12 +27,7 @@ public class CsvToXmlConverter implements FormatConverter {
         // First pass: read all rows and track max columns
         try (
             Reader reader = new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8);
-            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT
-                .withTrim()
-                .withIgnoreSurroundingSpaces()
-                .withIgnoreEmptyLines()
-                .withAllowMissingColumnNames()
-                .withSkipHeaderRecord(false))
+            CSVParser parser = new CSVParser(reader, CsvParsingUtil.getStandardCsvFormat())
         ) {
             for (CSVRecord record : parser) {
                 List<String> row = new ArrayList<>();

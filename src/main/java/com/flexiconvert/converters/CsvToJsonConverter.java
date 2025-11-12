@@ -3,6 +3,7 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.CsvParsingUtil;
 import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,12 +33,7 @@ public class CsvToJsonConverter implements FormatConverter {
 
         try (
             Reader reader = new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8);
-            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT
-                .withTrim(true)
-                .withIgnoreSurroundingSpaces()
-                .withIgnoreEmptyLines()
-                .withAllowMissingColumnNames()
-                .withSkipHeaderRecord(false)) // Treat all rows as data
+            CSVParser parser = new CSVParser(reader, CsvParsingUtil.getStandardCsvFormat())
         ) {
             Iterator<CSVRecord> iterator = parser.iterator();
                 if (!iterator.hasNext()) {

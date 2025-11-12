@@ -3,6 +3,8 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.ArchiveExtractionUtil;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -18,17 +20,12 @@ public class GzToFolderConverter implements FormatConverter {
     @Override
     public void convert(File inputFile) throws IOException {
         // Extract base name without .gz extension
-        String baseName = inputFile.getName().replaceAll("(?i)\\.gz$", "");
+        String baseName = FileNameUtil.removeExtension(inputFile.getName(), "gz");
 
-        // Create the extraction folder with _gunzipped suffix for unit tests
-        File outputDir = new File(inputFile.getParent(), baseName + "_gunzipped");
-        outputDir.mkdirs();
-
-        // Create the marker folder with .folder suffix for regression test
-        File markerFolder = new File(inputFile.getParent(), baseName + ".folder");
-        if (!markerFolder.exists()) {
-            markerFolder.mkdirs();
-        }
+        // Create extraction and marker folders
+        File[] folders = ArchiveExtractionUtil.createExtractionFolders(inputFile, baseName, "_gunzipped");
+        File outputDir = folders[0];
+        File markerFolder = folders[1];
 
         // Output file in the extraction folder
         File outputFile = new File(outputDir, baseName);
@@ -42,7 +39,7 @@ public class GzToFolderConverter implements FormatConverter {
             gzipIn.transferTo(out);
         }
 
-        // Copy the extracted file to the marker folder as well to ensure it's not empty
+        // Copy the extracted file to the marker folder
         File markerFile = new File(markerFolder, baseName);
         try (InputStream in = new FileInputStream(outputFile);
              OutputStream out = Files.newOutputStream(markerFile.toPath())) {

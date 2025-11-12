@@ -3,6 +3,8 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.ArchiveExtractionUtil;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -18,20 +20,12 @@ public class TarToFolderConverter implements FormatConverter {
 
     @Override
     public void convert(File inputFile) throws IOException {
-        String baseName = inputFile.getName();
-        if (baseName.toLowerCase().endsWith(".tar")) {
-            baseName = baseName.substring(0, baseName.length() - 4);
-        }
+        String baseName = FileNameUtil.getBaseName(inputFile, "tar");
         
-        // Create extraction folder with _untarred suffix
-        File outputDir = new File(inputFile.getParent(), baseName + "_untarred");
-        outputDir.mkdirs();
-        
-        // Create a marker folder with .folder suffix for the regression test
-        File markerFolder = new File(inputFile.getParent(), baseName + ".folder");
-        if (!markerFolder.exists()) {
-            markerFolder.mkdirs();
-        }
+        // Create extraction and marker folders
+        File[] folders = ArchiveExtractionUtil.createExtractionFolders(inputFile, baseName, "_untarred");
+        File outputDir = folders[0];
+        File markerFolder = folders[1];
 
         try (InputStream fis = new FileInputStream(inputFile);
             BufferedInputStream bis = new BufferedInputStream(fis);
@@ -46,11 +40,7 @@ public class TarToFolderConverter implements FormatConverter {
                 File outFile = new File(outputDir, firstEntry.getName());
                 
                 // Check for tar slip vulnerability
-                String canonicalDestinationPath = outFile.getCanonicalPath();
-                String canonicalOutputDirPath = outputDir.getCanonicalPath();
-                if (!canonicalDestinationPath.startsWith(canonicalOutputDirPath + File.separator)) {
-                    throw new IOException("Entry is outside of the target directory: " + firstEntry.getName());
-                }
+                ArchiveExtractionUtil.validateEntryPath(outFile, outputDir, firstEntry.getName());
 
                 if (firstEntry.isDirectory()) {
                     outFile.mkdirs();
@@ -65,21 +55,8 @@ public class TarToFolderConverter implements FormatConverter {
 
             } while ((firstEntry = tarIn.getNextTarEntry()) != null);
             
-            // Copy a sample file to the marker folder to make sure it's not empty
-            File sampleFile = new File(outputDir, "sample.txt");
-            if (sampleFile.exists()) {
-                File markerSample = new File(markerFolder, "sample.txt");
-                try (FileInputStream in = new FileInputStream(sampleFile);
-                     FileOutputStream out = new FileOutputStream(markerSample)) {
-                    in.transferTo(out);
-                } catch (IOException e) {
-                    // Just try to create an empty file if copying fails
-                    new File(markerFolder, "sample.txt").createNewFile();
-                }
-            } else {
-                // Create an empty file if no sample exists
-                new File(markerFolder, "sample.txt").createNewFile();
-            }
+            // Create marker sample file
+            ArchiveExtractionUtil.createMarkerSample(outputDir, markerFolder, "sample.txt");
         }
     }
 }

@@ -3,6 +3,7 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -88,7 +89,7 @@ public class CsvToJsonConverter implements FormatConverter {
             }
         }
 
-        File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
+        File outputFile = new File(inputFile.getParent(), FileNameUtil.getOutputFileName(inputFile, "json"));
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -110,11 +111,5 @@ public class CsvToJsonConverter implements FormatConverter {
         } catch (NumberFormatException ex) {
             return val;
         }
-    }
-
-    private String getOutputFileName(File inputFile) {
-        String name = inputFile.getName();
-        int dotIndex = name.lastIndexOf('.');
-        return (dotIndex != -1 ? name.substring(0, dotIndex) : name) + ".json";
     }
 }

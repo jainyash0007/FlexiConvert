@@ -3,6 +3,7 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 import org.apache.commons.csv.*;
 
@@ -52,7 +53,7 @@ public class CsvToXmlConverter implements FormatConverter {
             headers.add("FIELD" + i);
         }
 
-        File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
+        File outputFile = new File(inputFile.getParent(), FileNameUtil.getOutputFileName(inputFile, "xml"));
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
 
@@ -79,11 +80,5 @@ public class CsvToXmlConverter implements FormatConverter {
                  .replace(">", "&gt;")
                  .replace("\"", "&quot;")
                  .replace("'", "&apos;");
-    }
-
-    private String getOutputFileName(File inputFile) {
-        String name = inputFile.getName();
-        int dot = name.lastIndexOf('.');
-        return (dot != -1 ? name.substring(0, dot) : name) + ".xml";
     }
 }

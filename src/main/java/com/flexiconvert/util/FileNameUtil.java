@@ -46,4 +46,19 @@ public class FileNameUtil {
     public static String removeExtension(String fileName, String extension) {
         return fileName.replaceAll("(?i)\\." + extension + "$", "");
     }
+
+    /**
+     * Creates an output filename by replacing the extension.
+     * Removes any existing extension and adds the new one.
+     * 
+     * @param inputFile The input file
+     * @param newExtension The new extension (without dot)
+     * @return The output filename with the new extension
+     */
+    public static String getOutputFileName(File inputFile, String newExtension) {
+        String name = inputFile.getName();
+        int dotIndex = name.lastIndexOf('.');
+        String baseName = (dotIndex != -1) ? name.substring(0, dotIndex) : name;
+        return baseName + "." + newExtension;
+    }
 }

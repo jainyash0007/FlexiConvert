@@ -3,6 +3,7 @@ package com.flexiconvert.converters;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -47,17 +48,8 @@ public class PptxToPdfConverter implements FormatConverter {
                 }
             }
 
-            File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
+            File outputFile = new File(inputFile.getParent(), FileNameUtil.getOutputFileName(inputFile, "pdf"));
             pdf.save(outputFile);
         }
-    }
-
-    private String getOutputFileName(File inputFile) {
-        String name = inputFile.getName();
-        int dotIndex = name.lastIndexOf('.');
-        if (dotIndex != -1) {
-            name = name.substring(0, dotIndex);
-        }
-        return name + ".pdf";
     }
 }

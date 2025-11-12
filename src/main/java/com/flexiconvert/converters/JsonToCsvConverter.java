@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flexiconvert.ConversionType;
 import com.flexiconvert.interfaces.FormatConverter;
 import com.flexiconvert.annotations.ConverterFor;
+import com.flexiconvert.util.FileNameUtil;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -37,7 +38,7 @@ public class JsonToCsvConverter implements FormatConverter {
         }
 
         // Create output file
-        File outputFile = new File(inputFile.getParent(), getOutputFileName(inputFile));
+        File outputFile = new File(inputFile.getParent(), FileNameUtil.getOutputFileName(inputFile, "csv"));
 
         try (BufferedWriter writer = Files.newBufferedWriter(outputFile.toPath(), StandardCharsets.UTF_8)) {
             // Write header row
@@ -55,14 +56,5 @@ public class JsonToCsvConverter implements FormatConverter {
                 writer.newLine();
             }
         }
-    }
-
-    private String getOutputFileName(File inputFile) {
-        String name = inputFile.getName();
-        int dotIndex = name.lastIndexOf('.');
-        if (dotIndex != -1) {
-            name = name.substring(0, dotIndex);
-        }
-        return name + ".csv";
     }
 }
